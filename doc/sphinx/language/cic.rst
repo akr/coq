@@ -51,22 +51,23 @@ function types over these data types.
 Consequently they also have a type. Because assuming simply that :math:`\Set`
 has type :math:`\Set` leads to an inconsistent theory :cite:`Coq86`, the language of
 |Cic| has infinitely many sorts. There are, in addition to :math:`\Set` and :math:`\Prop`
-a hierarchy of universes :math:`\Type(i)` for any integer :math:`i`.
+a hierarchy of universes :math:`\Type(i)` for any integer :math:`i ≥ 1`.
+:math:`\Set` is considered as a synonym of :math:`\Type(0)`.
 
-Like :math:`\Set`, all of the sorts :math:`\Type(i)` contain small sets such as
+Like :math:`\Set`, all of the sorts :math:`\Type(i)` for :math:`i ≥ 1` contain small sets such as
 booleans, natural numbers, as well as products, subsets and function
 types over small sets. But, unlike :math:`\Set`, they also contain large sets,
-namely the sorts :math:`\Set` and :math:`\Type(j)` for :math:`j<i`, and all products, subsets
+namely the sorts :math:`\Type(j)` for :math:`0≤j<i`, and all products, subsets
 and function types over these sorts.
 
 Formally, we call :math:`\Sort` the set of sorts which is defined by:
 
 .. math::
    
-   \Sort \equiv \{\Prop,\Set,\Type(i)\;|\; i~∈ ℕ\}
+   \Sort \equiv \{\Prop,\Type(i)\;|\; i~∈ ℕ\}
 
-Their properties, such as: :math:`\Prop:\Type(1)`, :math:`\Set:\Type(1)`, and
-:math:`\Type(i):\Type(i+1)`, are defined in Section :ref:`subtyping-rules`.
+Their properties, such as: :math:`\Prop:\Type(1)`, and
+:math:`\Type(i):\Type(i+1)` for :math:`i≥0`, are defined in Section :ref:`subtyping-rules`.
 
 The user does not have to mention explicitly the index :math:`i` when
 referring to the universe :math:`\Type(i)`. One only writes :math:`\Type`. The system
@@ -299,15 +300,10 @@ following rules.
    ----------------------
    \WTEG{\Prop}{\Type(1)}
 
-.. inference:: Ax-Set
-
-   \WFE{\Gamma}
-   ---------------------
-   \WTEG{\Set}{\Type(1)}
-
 .. inference:: Ax-Type
 
    \WFE{\Gamma}
+   i ≥ 0
    ---------------------------
    \WTEG{\Type(i)}{\Type(i+1)}
 
@@ -333,10 +329,9 @@ following rules.
    -----------------------------
    \WTEG{∀ x:T,~U}{\Prop}
 
-.. inference:: Prod-Set
+.. inference:: Prod-Prop-Set
 
-   \WTEG{T}{s}
-   s \in \{\Prop, \Set\}
+   \WTEG{T}{\Prop}
    \WTE{\Gamma::(x:T)}{U}{\Set}
    ----------------------------
    \WTEG{∀ x:T,~U}{\Set}
@@ -345,6 +340,7 @@ following rules.
 
    \WTEG{T}{\Type(i)}
    \WTE{\Gamma::(x:T)}{U}{\Type(i)}
+   i ≥ 0
    --------------------------------
    \WTEG{∀ x:T,~U}{\Type(i)}
 
@@ -373,7 +369,7 @@ following rules.
 
 .. note::
 
-   **Prod-Prop** and **Prod-Set** typing-rules make sense if we consider the
+   **Prod-Prop-Set** and **Prod-Type** typing-rules make sense if we consider the
    semantic difference between :math:`\Prop` and :math:`\Set`:
 
    + All values of a type that has a sort :math:`\Set` are extractable.
@@ -608,10 +604,8 @@ a *subtyping* relation inductively defined by:
 
 
 #. if :math:`E[Γ] ⊢ t =_{βδιζη} u` then :math:`E[Γ] ⊢ t ≤_{βδιζη} u`,
-#. if :math:`i ≤ j` then :math:`E[Γ] ⊢ \Type(i) ≤_{βδιζη} \Type(j)`,
-#. for any :math:`i`, :math:`E[Γ] ⊢ \Set ≤_{βδιζη} \Type(i)`,
-#. :math:`E[Γ] ⊢ \Prop ≤_{βδιζη} \Set`, hence, by transitivity,
-   :math:`E[Γ] ⊢ \Prop ≤_{βδιζη} \Type(i)`, for any :math:`i`
+#. if :math:`0 ≤ i ≤ j` then :math:`E[Γ] ⊢ \Type(i) ≤_{βδιζη} \Type(j)`,
+#. :math:`E[Γ] ⊢ \Prop ≤_{βδιζη} \Type(i)`, for any :math:`i≥0`
 #. if :math:`E[Γ] ⊢ T =_{βδιζη} U` and
    :math:`E[Γ::(x:T)] ⊢ T' ≤_{βδιζη} U'` then
    :math:`E[Γ] ⊢ ∀x:T,~T′ ≤_{βδιζη} ∀ x:U,~U′`.
@@ -1320,7 +1314,7 @@ and :math:`I:A` and :math:`λ a x . P : B` then by :math:`[I:A|B]` we mean that 
 **Notations.** The :math:`[I:A|B]` is defined as the smallest relation satisfying the
 following rules: We write :math:`[I|B]` for :math:`[I:A|B]` where :math:`A` is the type of :math:`I`.
 
-The case of inductive definitions in sorts :math:`\Set` or :math:`\Type` is simple.
+The case of inductive definitions in sorts :math:`\Type` is simple.
 There is no restriction on the sort of the predicate to be eliminated.
 
 .. inference:: Prod
@@ -1330,12 +1324,12 @@ There is no restriction on the sort of the predicate to be eliminated.
    [I:∀ x:A,~A′|∀ x:A,~B′]
 
    
-.. inference:: Set & Type
+.. inference:: Type
 
-   s_1 ∈ \{\Set,\Type(j)\}
-   s_2 ∈ \Sort
+   j ≥ 0
+   s ∈ \Sort
    ----------------
-   [I:s_1 |I→ s_2 ]
+   [I:\Type(j) |I→ s]
 
 
 The case of Inductive definitions of sort :math:`\Prop` is a bit more
@@ -1891,6 +1885,7 @@ impredicative system for sort :math:`\Set` become:
 
    I~\kw{is a small inductive definition}
    s ∈ \{\Type(i)\}
+   i ≥ 1
    ----------------
    [I:\Set|I→ s]
 
